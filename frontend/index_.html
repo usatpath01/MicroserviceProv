@@ -1,0 +1,73 @@
+<!-- frontend/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vulnerable Photo Sharing App</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <h1>Welcome to Vulnerable Photo Sharing</h1>
+    <div id="login">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+    </div>
+    <div id="upload" style="display:none;">
+        <h2>Upload Photo</h2>
+        <input type="file" id="photo">
+        <button onclick="uploadPhoto()">Upload</button>
+    </div>
+    <div id="photos"></div>
+
+    <script>
+        function login() {
+            const username = $('#username').val();
+            const password = $('#password').val();
+            $.post('/api/login', {username, password}, function(data) {
+                if (data.status === 'success') {
+                    $('#login').hide();
+                    $('#upload').show();
+                    loadPhotos(data.user_id);
+                } else {
+                    alert('Login failed');
+                }
+            });
+        }
+
+        function uploadPhoto() {
+            const formData = new FormData();
+            formData.append('file', $('#photo')[0].files[0]);
+            formData.append('user_id', currentUserId);
+            $.ajax({
+                url: '/api/upload',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(data) {
+                    if (data.status === 'success') {
+                        loadPhotos(currentUserId);
+                    }
+                }
+            });
+        }
+
+        function loadPhotos(userId) {
+            $.get('/api/photos?user_id=' + userId, function(data) {
+                if (data.status === 'success') {
+                    let html = '';
+                    data.photos.forEach(photo => {
+                        // Vulnerability: Cross-Site Scripting (XSS)
+                        html += '<img src="/api/photo/' + photo.filename + '" alt="' + photo.filename + '">';
+                        html += '<p>' + photo.filename + '</p>';
+                    });
+                    $('#photos').html(html);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

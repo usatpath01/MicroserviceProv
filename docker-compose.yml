@@ -1,0 +1,123 @@
+version: '3'
+
+services:
+  frontend:
+    image: usatpath01/vulnerable-photo-app-frontend:latest
+    ports:
+      - "80:80"
+    depends_on:
+      - api_gateway
+    networks:
+      - frontend_network
+
+  api_gateway:
+    image: usatpath01/vulnerable-photo-app-api-gateway:latest
+    ports:
+      - "8000:8000"
+    depends_on:
+      - user_service
+      - photo_service
+      - notification_service
+      - recommendation_service
+      - analytics_service
+    networks:
+      - frontend_network
+      - backend_network
+      
+  user_service:
+    image: usatpath01/vulnerable-photo-app-user-service:latest
+    environment:
+      - DB_HOST=user_db
+      - DB_USER=root
+      - DB_PASSWORD=insecure_password
+      - DB_NAME=users
+    depends_on:
+      - user_db
+    networks:
+      - backend_network
+
+  photo_service:
+    image: usatpath01/vulnerable-photo-app-photo-service:latest
+    volumes:
+      - photo_uploads:/app/uploads
+    environment:
+      - DB_CONNECTION_STRING=mysql://root:insecure_password@photo_db/photos
+    depends_on:
+      - photo_db
+    networks:
+      - backend_network
+
+  notification_service:
+    image: usatpath01/vulnerable-photo-app-notification-service:latest
+    environment:
+      - REDIS_URL=redis://notification_cache
+    depends_on:
+      - notification_cache
+    networks:
+      - backend_network
+
+  recommendation_service:
+    image: usatpath01/vulnerable-photo-app-recommendation-service:latest
+    environment:
+      - DB_CONNECTION_STRING=mongodb://recommendation_db:27017/recommendations
+    depends_on:
+      - recommendation_db
+    networks:
+      - backend_network
+
+  analytics_service:
+    image: usatpath01/vulnerable-photo-app-analytics-service:latest
+    environment:
+      - ELASTICSEARCH_URL=http://analytics_db:9200
+    depends_on:
+      - analytics_db
+    networks:
+      - backend_network
+
+  user_db:
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=insecure_password
+      - MYSQL_DATABASE=users
+    volumes:
+      - user_db_data:/var/lib/mysql
+    networks:
+      - backend_network
+
+  photo_db:
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=insecure_password
+      - MYSQL_DATABASE=photos
+    volumes:
+      - photo_db_data:/var/lib/mysql
+    networks:
+      - backend_network
+
+  notification_cache:
+    image: redis:6-alpine
+    networks:
+      - backend_network
+
+  recommendation_db:
+    image: mongo:4.4
+    networks:
+      - backend_network
+
+  analytics_db:
+    image: elasticsearch:7.14.0
+    environment:
+      - discovery.type=single-node
+    networks:
+      - backend_network
+
+networks:
+  frontend_network:
+  backend_network:
+  # app_network:
+  #   driver: overlay
+
+volumes:
+  user_db_data:
+  photo_db_data:
+  photo_uploads:

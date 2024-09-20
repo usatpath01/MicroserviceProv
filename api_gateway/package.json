@@ -1,0 +1,13 @@
+{
+    "name": "vulnerable-photo-app-api-gateway",
+    "version": "1.0.0",
+    "description": "API Gateway for Vulnerable Photo Sharing App",
+    "main": "app.js",
+    "scripts": {
+      "start": "node app.js"
+    },
+    "dependencies": {
+      "express": "^4.17.1",
+      "http-proxy-middleware": "^2.0.1"
+    }
+  }
