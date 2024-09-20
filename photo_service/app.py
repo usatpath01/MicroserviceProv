@@ -120,11 +120,18 @@ def upload_photo():
     return jsonify({"status": "error", "message": f"File type not allowed: {file.filename}"}), 400
 
 
-@app.route('/api/v1/photo/<filename>')
+
+@app.route('/api/v1/photos/<filename>')
 def get_photo(filename):
-    # Vulnerability: Path Traversal
+    app.logger.info(f"Received request for photo: {filename}")
     file_path = os.path.join(UPLOAD_FOLDER, filename)
-    return send_file(file_path)
+    app.logger.info(f"Looking for file at path: {file_path}")
+    if os.path.exists(file_path):
+        app.logger.info(f"File found, sending: {file_path}")
+        return send_file(file_path)
+    else:
+        app.logger.error(f"File not found: {file_path}")
+        return jsonify({"status": "error", "message": "File not found"}), 404
 
 @app.route('/api/v1/photos', methods=['GET'])
 def get_photos():

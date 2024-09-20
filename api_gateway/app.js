@@ -61,6 +61,9 @@ const photoServiceProxy = createProxyMiddleware({
   onProxyReq: (proxyReq, req, res) => {
     console.log(`Proxying ${req.method} request to: ${proxyReq.path}`);
   },
+  onProxyRes: (proxyRes, req, res) => {
+    console.log(`Received response from photo service: ${proxyRes.statusCode}`);
+  },
   onError: (err, req, res) => {
     console.error('Proxy error:', err);
     res.status(500).json({ status: 'error', message: 'Proxy error occurred' });
