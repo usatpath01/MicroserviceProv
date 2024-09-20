@@ -9,6 +9,9 @@
     "dependencies": {
       "express": "^4.17.1",
       "http-proxy-middleware": "^2.0.1",
-      "cors": "^2.8.5"
+      "cors": "^2.8.5",
+      "multer": "^1.4.3",
+      "axios": "^0.21.1",
+      "form-data": "^4.0.0"
     }
   }

@@ -7,6 +7,8 @@ import os
 import time
 from mysql.connector import Error
 import uuid
+from werkzeug.utils import secure_filename
+
 
 app = Flask(__name__)
 CORS(app)
@@ -68,42 +70,63 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/upload', methods=['POST'])
+
+@app.route('/api/v1/photos/upload', methods=['POST'])
 def upload_photo():
+    app.logger.info(f"Received upload request. Files: {request.files}")
+    app.logger.info(f"Form data: {request.form}")
+    
     if 'file' not in request.files:
+        app.logger.error("No file part in the request")
         return jsonify({"status": "error", "message": "No file part"}), 400
+    
     file = request.files['file']
+    user_id = request.form.get('user_id')
+    
+    app.logger.info(f"File details: name={file.filename}, content_type={file.content_type}")
+    
     if file.filename == '':
+        app.logger.error("No selected file")
         return jsonify({"status": "error", "message": "No selected file"}), 400
     
-    # Vulnerability: Insecure File Upload
-    if file:
-        filename = str(uuid.uuid4()) + os.path.splitext(file.filename)[1]
+    if not user_id:
+        app.logger.error("No user_id provided")
+        return jsonify({"status": "error", "message": "No user_id provided"}), 400
+    
+    if file and allowed_file(file.filename):
+        filename = secure_filename(str(uuid.uuid4()) + os.path.splitext(file.filename)[1])
         file_path = os.path.join(UPLOAD_FOLDER, filename)
         file.save(file_path)
         
-        conn = get_db_connection()
-        cursor = conn.cursor()
         try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
             query = "INSERT INTO photos (filename, user_id) VALUES (%s, %s)"
-            cursor.execute(query, (filename, request.form['user_id']))
+            cursor.execute(query, (filename, user_id))
             conn.commit()
             
+            app.logger.info(f"File uploaded successfully: {filename} for user_id: {user_id}")
             return jsonify({"status": "success", "message": "File uploaded successfully", "filename": filename})
         except mysql.connector.Error as err:
             app.logger.error(f"Database error during photo upload: {err}")
             return jsonify({"status": "error", "message": f"Database error: {str(err)}"}), 500
         finally:
-            cursor.close()
-            conn.close()
+            if 'cursor' in locals():
+                cursor.close()
+            if 'conn' in locals():
+                conn.close()
+    
+    app.logger.error(f"File type not allowed: {file.filename}")
+    return jsonify({"status": "error", "message": f"File type not allowed: {file.filename}"}), 400
 
-@app.route('/photo/<filename>')
+
+@app.route('/api/v1/photo/<filename>')
 def get_photo(filename):
     # Vulnerability: Path Traversal
     file_path = os.path.join(UPLOAD_FOLDER, filename)
     return send_file(file_path)
 
-@app.route('/photos', methods=['GET'])
+@app.route('/api/v1/photos', methods=['GET'])
 def get_photos():
     user_id = request.args.get('user_id')
     conn = get_db_connection()
@@ -122,5 +145,6 @@ def get_photos():
 
 if __name__ == '__main__':
     app.logger.info("Starting Photo Service...")
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     create_photos_table()
     app.run(host='0.0.0.0', port=5000)

@@ -38,14 +38,40 @@ services:
 
   photo_service:
     image: usatpath01/vulnerable-photo-app-photo-service:latest
+    environment:
+      - DB_HOST=photo_db
+      - DB_USER=root
+      - DB_PASSWORD=insecure_password
+      - DB_NAME=photos
     volumes:
       - photo_uploads:/app/uploads
-    environment:
-      - DB_CONNECTION_STRING=mysql://root:insecure_password@photo_db/photos
-    depends_on:
-      - photo_db
     networks:
       - backend_network
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == utkalika
+    depends_on:
+      - photo_db
+
+  # photo_service:
+  #   image: usatpath01/vulnerable-photo-app-photo-service:latest
+  #   volumes:
+  #     - photo_uploads:/app/uploads
+  #   environment:
+  #     - DB_CONNECTION_STRING=mysql://root:insecure_password@photo_db/photos
+  #   depends_on:
+  #     - photo_db
+  #   deploy:
+  #     mode: replicated
+  #     replicas: 1
+  #     placement:
+  #       constraints:
+  #         - node.hostname == utkalika
+  #   networks:
+  #     - backend_network
 
   notification_service:
     image: usatpath01/vulnerable-photo-app-notification-service:latest
@@ -91,8 +117,30 @@ services:
       - MYSQL_DATABASE=photos
     volumes:
       - photo_db_data:/var/lib/mysql
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == utkalika
     networks:
       - backend_network
+
+  # photo_db:
+  #   image: mysql:5.7
+  #   environment:
+  #     - MYSQL_ROOT_PASSWORD=insecure_password
+  #     - MYSQL_DATABASE=photos
+  #   volumes:
+  #     - photo_db_data:/var/lib/mysql
+  #   deploy:
+  #     mode: replicated
+  #     replicas: 1
+  #     placement:
+  #       constraints:
+  #         - node.hostname == utkalika
+  #   networks:
+  #     - backend_network
 
   notification_cache:
     image: redis:6-alpine

