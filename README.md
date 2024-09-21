@@ -33,7 +33,7 @@ CREATE TABLE users (
     email VARCHAR(255) NOT NULL UNIQUE,
     is_admin BOOLEAN DEFAULT FALSE
 );
-INSERT INTO users (username, password, email) VALUES ('testuser', 'testpassword', 'testuser@example.com');
+INSERT INTO users (username, password, email) VALUES ('user1', 'user1_1234', 'user1@gmail.com');
 ```
 
 ```
@@ -81,6 +81,9 @@ curl -X POST "http://10.5.20.45:8000/api/users/register"      -H "Content-Type: 
   }
 }
 
+curl -X POST "http://10.5.20.45:8000/api/users/register"      -H "Content-Type: application/json"      -d '{"username":"user1", "password":"user1_1234", "email":"user1@gmail.com"}'
+
+curl -X POST "http://10.5.20.45:8000/api/users/login"      -H "Content-Type: application/json"      -d '{"username":"user1","password":"user1_1234"}'
 
 curl -X POST "http://10.5.20.45:8000/api/photos/upload" \
      -H "Content-Type: multipart/form-data" \

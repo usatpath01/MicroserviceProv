@@ -103,14 +103,17 @@ def register():
             app.logger.warning("Missing required fields in registration attempt")
             return jsonify({"status": "error", "message": "Missing required fields"}), 400
 
-        db = mysql.connector.connect(
-            host="user_db",
-            user="root",
-            password="insecure_password",
-            database="users"
-        )
-        cursor = db.cursor()
+        db = None
+        cursor = None
         try:
+            db = mysql.connector.connect(
+                host="user_db",
+                user="root",
+                password="insecure_password",
+                database="users"
+            )
+            cursor = db.cursor()
+
             query = "INSERT INTO users (username, password, email) VALUES (%s, %s, %s)"
             cursor.execute(query, (username, password, email))
             db.commit()
@@ -136,11 +139,14 @@ def register():
             app.logger.error(f"Database error during registration: {str(e)}")
             return jsonify({"status": "error", "message": f"Database error: {str(e)}"}), 500
         finally:
-            cursor.close()
-            db.close()
+            if cursor:
+                cursor.close()
+            if db and db.is_connected():
+                db.close()
     except Exception as e:
         app.logger.error(f"Server error during registration: {str(e)}")
         return jsonify({"status": "error", "message": f"Server error: {str(e)}"}), 500
+
 
 
 
@@ -152,12 +158,7 @@ def login():
     app.logger.info(f"Request body: {request.get_data(as_text=True)}")
     
     try:
-        if request.is_json:
-            data = request.get_json()
-        else:
-            data = request.form
-
-        app.logger.info(f"Parsed data: {data}")
+        data = request.get_json()
         
         if not data:
             return jsonify({"status": "error", "message": "No data received"}), 400
@@ -168,29 +169,44 @@ def login():
         if not username or not password:
             return jsonify({"status": "error", "message": "Missing username or password"}), 400
         
-        # Your existing login logic here
-        # For example:
-        cursor = db.cursor()
-        query = "SELECT id, username, email FROM users WHERE username = %s AND password = %s"
-        cursor.execute(query, (username, password))
-        user = cursor.fetchone()
-        cursor.close()
+        db = None
+        cursor = None
+        try:
+            db = mysql.connector.connect(
+                host="user_db",
+                user="root",
+                password="insecure_password",
+                database="users"
+            )
+            cursor = db.cursor()
 
-        if user:
-            return jsonify({
-                "status": "success",
-                "message": "Login successful",
-                "user": {
-                    "id": user[0],
-                    "username": user[1],
-                    "email": user[2]
-                }
-            }), 200
-        else:
-            return jsonify({"status": "error", "message": "Invalid credentials"}), 401
+            query = "SELECT id, username, email FROM users WHERE username = %s AND password = %s"
+            cursor.execute(query, (username, password))
+            user = cursor.fetchone()
+
+            if user:
+                return jsonify({
+                    "status": "success",
+                    "message": "Login successful",
+                    "user": {
+                        "id": user[0],
+                        "username": user[1],
+                        "email": user[2]
+                    }
+                }), 200
+            else:
+                return jsonify({"status": "error", "message": "Invalid credentials"}), 401
+        except Exception as e:
+            app.logger.error(f"Database error during login: {str(e)}")
+            return jsonify({"status": "error", "message": f"Database error: {str(e)}"}), 500
+        finally:
+            if cursor:
+                cursor.close()
+            if db and db.is_connected():
+                db.close()
 
     except Exception as e:
-        app.logger.error(f"Error in login route: {str(e)}")
+        app.logger.error(f"Server error during login: {str(e)}")
         return jsonify({"status": "error", "message": f"Server error: {str(e)}"}), 500
 
 
