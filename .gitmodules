@@ -1,0 +1,3 @@
+[submodule "LoggingFramework"]
+	path = LoggingFramework
+	url = https://github.com/usatpath01/Pluggable_Logging.git
