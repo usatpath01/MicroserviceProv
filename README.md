@@ -3,22 +3,22 @@
 ![Screenshot](picshare.drawio.png)
 *Architecture of PicShare Application - A photosharing microservice based application intentionally injected with vulnerabilites for testing* 
 
-Frontend: A web interface for users to interact with the application.
-API Gateway: Routes requests to appropriate microservices.
-User Service: Handles user authentication and management.
-Photo Service: Manages photo uploads and retrieval.
-User DB and Photo DB: MySQL databases for storing user and photo data.
-Recommendation Service
-Analytics Service
-Profile Service
+1. Frontend: A web interface for users to interact with the application.
+2. API Gateway: Routes requests to appropriate microservices.
+3. User Service: Handles user authentication and management.
+4. Photo Service: Manages photo uploads and retrieval.
+5. User DB and Photo DB: MySQL databases for storing user and photo data.
+6. Recommendation Service
+7. Analytics Service
+8. Profile Service
 
 This setup includes the following vulnerabilities:
 
-SQL Injection: In both user_service and photo_service, SQL queries are constructed using string interpolation.
-Insecure File Upload: The photo_service doesn't properly validate uploaded files.
-Sensitive Data Exposure: The user_service exposes sensitive information like passwords in API responses.
-Broken Authentication: The user_service has a weak password policy.
-Cross-Site Scripting (XSS): The frontend doesn't properly sanitize user input when displaying photo filenames.
+1. SQL Injection: In both user_service and photo_service, SQL queries are constructed using string interpolation.
+2. Insecure File Upload: The photo_service doesn't properly validate uploaded files.
+3. Sensitive Data Exposure: The user_service exposes sensitive information like passwords in API responses.
+4. Broken Authentication: The user_service has a weak password policy.
+5. Cross-Site Scripting (XSS): The frontend doesn't properly sanitize user input when displaying photo filenames.
 
 ```
 μProv 
@@ -27,6 +27,15 @@ Cross-Site Scripting (XSS): The frontend doesn't properly sanitize user input wh
 |__ ML Model
 ```
 
+### System Configuration:
+```
+Ubuntu 22.04
+Linux 6.5.0-41-generic
+x86-64
+Number of vCPU cores = 16
+RAM = 64 GB
+HDD Size = 500GB (Manager), 250GB (Workers)
+```
 ### Directory Structure:
 ```ML```: contains the ipynb file with graph generation code and ML model implementation for Tracee and μProv
 
