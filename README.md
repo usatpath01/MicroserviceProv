@@ -20,6 +20,7 @@ This setup includes the following vulnerabilities:
 4. Broken Authentication: The user_service has a weak password policy.
 5. Cross-Site Scripting (XSS): The frontend doesn't properly sanitize user input when displaying photo filenames.
 
+To run the PicShare Application: ``` docker stack deploy -c docker-compose.yml vulnerable-photo-app```
 ```
 μProv 
 ├── Logging Framework
@@ -48,8 +49,8 @@ HDD Size = 500GB (Manager), 250GB (Workers)
 ### Running Tracee
 ``` docker run --name tracee_$(hostname) --rm -d --privileged -v /etc/os-release:/host/etc/os-release:ro -v /lib/modules:/lib/modules:ro -v /usr/src:/usr/src:ro -v /tmp:/tmp -v /etc/os-release:/etc/os-release-host:ro -it aquasec/tracee:latest -e "read,write,bind,connect,accept,accept4,clone,close,creat,dup,dup2,dup3,execve,exit,exit_group,fork,open,openat,rename,renameat,unlink,unlinkat,vfork" -o json --scope container```
 
-# Endpoint
 
+# Endpoint
 ## User Service:
 ### Login User: 
 Request:
