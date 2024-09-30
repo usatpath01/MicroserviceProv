@@ -166,6 +166,8 @@ def login():
         username = data.get('username')
         password = data.get('password')
         
+        app.logger.info(f"Login attempt for username: {username}")
+        
         if not username or not password:
             return jsonify({"status": "error", "message": "Missing username or password"}), 400
         
@@ -180,11 +182,15 @@ def login():
             )
             cursor = db.cursor()
 
-            query = "SELECT id, username, email FROM users WHERE username = %s AND password = %s"
-            cursor.execute(query, (username, password))
+            # Intentionally vulnerable to SQL injection
+            query = f"SELECT id, username, email FROM users WHERE username = '{username}' AND password = '{password}'"
+            app.logger.info(f"Executing SQL query: {query}")
+            
+            cursor.execute(query)
             user = cursor.fetchone()
 
             if user:
+                app.logger.info(f"Login successful for user: {user[1]}")
                 return jsonify({
                     "status": "success",
                     "message": "Login successful",
@@ -195,6 +201,7 @@ def login():
                     }
                 }), 200
             else:
+                app.logger.info("Login failed: Invalid credentials")
                 return jsonify({"status": "error", "message": "Invalid credentials"}), 401
         except Exception as e:
             app.logger.error(f"Database error during login: {str(e)}")
@@ -209,7 +216,41 @@ def login():
         app.logger.error(f"Server error during login: {str(e)}")
         return jsonify({"status": "error", "message": f"Server error: {str(e)}"}), 500
 
+@app.route('/api/v1/users/search', methods=['GET'])
+def search_users():
+    search_term = request.args.get('term', '')
+    cursor = db.cursor()
+    # Vulnerable query
+    query = f"SELECT * FROM users WHERE username LIKE '%{search_term}%'"
+    cursor.execute(query)
+    users = cursor.fetchall()
+    return jsonify({"users": users})
 
+@app.route('/api/v1/users', methods=['GET'])
+def get_users():
+   
+    username = request.args.get('username')
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    # VULNERABILITY: This is intentionally vulnerable to SQL injection
+    query = f"SELECT * FROM users WHERE username = {'username'}"
+
+    try:
+        # Execute the vulnerable query
+        cursor.execute(query)
+        users = cursor.fetchall()
+        
+        # Log the executed query for educational purposes
+        app.logger.info(f"Executed query: {query}")
+        
+        return jsonify({"status": "success", "users": users})
+    except mysql.connector.Error as err:
+        app.logger.error(f"Database error while fetching users: {err}")
+        return jsonify({"status": "error", "message": f"Database error: {str(err)}"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+        
 @app.route('/health', methods=['GET'])
 def health_check():
     app.logger.info("Health check request received")

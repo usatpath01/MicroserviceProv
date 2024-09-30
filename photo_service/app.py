@@ -163,20 +163,6 @@ def get_photos():
         conn.close()
 
 
-# @app.route('/api/v1/photos/<path:filename>')
-# def serve_file(filename):
-#     file_path = os.path.join(UPLOAD_FOLDER, filename)
-#     if filename.endswith('.php') and 'cmd' in request.args:
-#         # Simulate PHP execution
-#         cmd = request.args.get('cmd')
-#         try:
-#             output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
-#             return f"<pre>{output.decode()}</pre>"
-#         except subprocess.CalledProcessError as e:
-#             return f"<pre>Command failed: {e.output.decode()}</pre>"
-#     else:
-#         return send_from_directory(UPLOAD_FOLDER, filename)
-    
     
 if __name__ == '__main__':
     app.logger.info("Starting Photo Service...")

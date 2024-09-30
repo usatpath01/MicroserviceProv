@@ -7,6 +7,12 @@ services:
       - "80:80"
     depends_on:
       - api_gateway
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == new-WK5-SMRL
     networks:
       - frontend_network
 
@@ -20,6 +26,12 @@ services:
       - notification_service
       - recommendation_service
       - analytics_service
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == new-WK5-SMRL
     networks:
       - frontend_network
       - backend_network
@@ -33,6 +45,12 @@ services:
       - DB_NAME=users
     depends_on:
       - user_db
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == new-WK3
     networks:
       - backend_network
 
@@ -52,26 +70,9 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.hostname == utkalika
+          - node.hostname == new-WK2
     depends_on:
       - photo_db
-
-  # photo_service:
-  #   image: usatpath01/vulnerable-photo-app-photo-service:latest
-  #   volumes:
-  #     - photo_uploads:/app/uploads
-  #   environment:
-  #     - DB_CONNECTION_STRING=mysql://root:insecure_password@photo_db/photos
-  #   depends_on:
-  #     - photo_db
-  #   deploy:
-  #     mode: replicated
-  #     replicas: 1
-  #     placement:
-  #       constraints:
-  #         - node.hostname == utkalika
-  #   networks:
-  #     - backend_network
 
   notification_service:
     image: usatpath01/vulnerable-photo-app-notification-service:latest
@@ -79,6 +80,12 @@ services:
       - REDIS_URL=redis://notification_cache
     depends_on:
       - notification_cache
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == new-WK5-SMRL
     networks:
       - backend_network
 
@@ -88,6 +95,12 @@ services:
       - DB_CONNECTION_STRING=mongodb://recommendation_db:27017/recommendations
     depends_on:
       - recommendation_db
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == new-WK2
     networks:
       - backend_network
 
@@ -97,6 +110,12 @@ services:
       - ELASTICSEARCH_URL=http://analytics_db:9200
     depends_on:
       - analytics_db
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == new-WK5-SMRL
     networks:
       - backend_network
 
@@ -107,6 +126,12 @@ services:
       - MYSQL_DATABASE=users
     volumes:
       - user_db_data:/var/lib/mysql
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == new-WK3
     networks:
       - backend_network
 
@@ -122,35 +147,31 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.hostname == utkalika
+          - node.hostname == new-WK2
     networks:
       - backend_network
-
-  # photo_db:
-  #   image: mysql:5.7
-  #   environment:
-  #     - MYSQL_ROOT_PASSWORD=insecure_password
-  #     - MYSQL_DATABASE=photos
-  #   volumes:
-  #     - photo_db_data:/var/lib/mysql
-  #   deploy:
-  #     mode: replicated
-  #     replicas: 1
-  #     placement:
-  #       constraints:
-  #         - node.hostname == utkalika
-  #   networks:
-  #     - backend_network
 
   notification_cache:
     image: redis:6-alpine
     networks:
       - backend_network
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == new-WK5-SMRL
 
   recommendation_db:
     image: mongo:4.4
     networks:
       - backend_network
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == new-WK2
 
   analytics_db:
     image: elasticsearch:7.14.0
@@ -158,6 +179,25 @@ services:
       - discovery.type=single-node
     networks:
       - backend_network
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == new-WK5-SMRL
+  
+  profile-service:
+    image: usatpath01/vulnerable-photo-app-profile-service:latest
+    ports:
+      - "3000:3000"
+    networks:
+      - backend_network
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == new-WK3
 
 networks:
   frontend_network:

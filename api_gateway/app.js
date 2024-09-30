@@ -80,6 +80,22 @@ const recommendationServiceProxy = createProxyMiddleware({
   target: 'http://recommendation_service:5000',
   changeOrigin: true,
   pathRewrite: {'^/api/recommendations': ''},
+  onProxyReq: (proxyReq, req, res) => {
+    console.log(`Proxying ${req.method} request to: ${proxyReq.path}`);
+    if (req.body) {
+      const bodyData = JSON.stringify(req.body);
+      proxyReq.setHeader('Content-Type', 'application/json');
+      proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+      proxyReq.write(bodyData);
+    }
+  },
+  onProxyRes: (proxyRes, req, res) => {
+    console.log(`Received response from recommendation service: ${proxyRes.statusCode}`);
+  },
+  onError: (err, req, res) => {
+    console.error('Proxy error:', err);
+    res.status(500).json({ error: 'Proxy error', message: err.message });
+  }
 });
 
 const analyticsServiceProxy = createProxyMiddleware({
