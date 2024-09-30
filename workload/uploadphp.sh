@@ -1,10 +1,10 @@
 #!/bin/bash
 
-url="http://10.5.20.45:8000/api/photos/upload"
-photo_dir="/home/utkalika/Work/vulnerable-photo-app/scripts/php100"
-log_file="/home/utkalika/Work/Pluggable_Logging/Collector_logs/Vulnerable_Photo_App/PhotoService/Attack/2024-09-25_15-46-22.txt"
+url="http://XX.X.XX.XX:XXXX/api/photos/upload"
+photo_dir="/home/$hostname/Work/vulnerable-photo-app/scripts/php100"
+log_file="/home/$hostname/Work/Pluggable_Logging/Collector_logs/Vulnerable_Photo_App/PhotoService/Attack/2024-09-25_15-46-22.txt"
 
-log_dir="/home/utkalika/Work/vulnerable-photo-app/logs/PhotoService/Attack"
+log_dir="/home/$hostname/Work/vulnerable-photo-app/logs/PhotoService/Attack"
 
 move_and_truncate_log() {
     new_log_file="$log_dir/uploadphp_${user_id}_attack.log"

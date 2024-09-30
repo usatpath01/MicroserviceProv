@@ -1,9 +1,9 @@
 #!/bin/bash
 
-url="http://10.5.20.45:8000/api/photos/upload"
-photo_dir="/home/utkalika/Work/vulnerable-photo-app/scripts/images100"
-log_file="/home/utkalika/Work/Pluggable_Logging/Collector_logs/Vulnerable_Photo_App/PhotoService/Benign/2024-09-27_10-38-25.txt"
-log_dir="/home/utkalika/Work/vulnerable-photo-app/logs/XPLOG/PhotoService/Benign"
+url="http://XX.X.XX.XX:XXXX/api/photos/upload"
+photo_dir="/home/$hostname/Work/vulnerable-photo-app/scripts/images100"
+log_file="/home/$hostname/Work/Pluggable_Logging/Collector_logs/Vulnerable_Photo_App/PhotoService/Benign/2024-09-27_10-38-25.txt"
+log_dir="/home/$hostname/Work/vulnerable-photo-app/logs/XPLOG/PhotoService/Benign"
 user_id=1
 i = 1
 move_and_truncate_log() {

@@ -1,13 +1,13 @@
 #!/bin/bash
-base_url="http://10.5.20.45:8000/api/photos"
-photo_file="/home/utkalika/Work/vulnerable-photo-app/scripts/photos_names.txt"
-download_dir="/home/utkalika/Work/vulnerable-photo-app/scripts/downloaded_images"
+base_url="http://X.X.XX.XX:XXXX/api/photos"
+photo_file="/home/$hostname/Work/vulnerable-photo-app/scripts/photos_names.txt"
+download_dir="/home/$hostname/Work/vulnerable-photo-app/scripts/downloaded_images"
 
-log_file="/home/utkalika/Work/Pluggable_Logging/Collector_logs/Vulnerable_Photo_App/PhotoService/Benign/2024-09-25_06-48-30.txt"
+log_file="<Log File Location>"
 
 i=1
 move_and_truncate_log() {
-    new_log_file="/home/utkalika/Work/vulnerable-photo-app/logs/PhotoService/Benign/downloadphoto_${i}_normal.log"
+    new_log_file="/home/$hostname/Work/vulnerable-photo-app/logs/PhotoService/Benign/downloadphoto_${i}_normal.log"
     cat "$log_file" > "$new_log_file" && truncate -s 0 "$log_file"
     echo "Log content moved to $new_log_file and source log file truncated."
 }

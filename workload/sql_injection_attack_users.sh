@@ -1,13 +1,13 @@
 #!/bin/bash
 
-base_url="http://10.5.20.45:8000/api/users"
+base_url="http://XX.X.X.XX:XXXX/api/users"
 
-log_file="/home/utkalika/Work/Pluggable_Logging/Collector_logs/Vulnerable_Photo_App/UserService/Attack/2024-09-25_23-47-00.txt"
+log_file="/home/$hostname/Work/Pluggable_Logging/Collector_logs/Vulnerable_Photo_App/UserService/Attack/2024-09-25_23-47-00.txt"
 
 i=1
 
 move_and_truncate_log() {
-    new_log_file="/home/utkalika/Work/vulnerable-photo-app/logs/UserService/Attack/users_sqlinjection_attack_${i}_normal.log"
+    new_log_file="/home/$hostname/Work/vulnerable-photo-app/logs/UserService/Attack/users_sqlinjection_attack_${i}_normal.log"
     cat "$log_file" > "$new_log_file" && truncate -s 0 "$log_file"
     echo "Log content moved to $new_log_file and source log file truncated."
 }

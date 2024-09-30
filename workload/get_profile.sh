@@ -1,16 +1,16 @@
 #!/bin/bash
 
-base_url="http://10.5.20.45:3000/profile"
+base_url="http://X.X.XX.XX:XXXX/profile"
 
 generate_random_username() {
     random_username=$(shuf -i 1000-9999 -n 1)
     echo "$random_username"
 }
 
-log_file="/home/utkalika/Work/Pluggable_Logging/Collector_logs/Vulnerable_Photo_App/ProfileService/Benign/2024-09-25_23-32-45.txt"
+log_file="/home/$hostname/Work/Pluggable_Logging/Collector_logs/Vulnerable_Photo_App/ProfileService/Benign/2024-09-25_23-32-45.txt"
 i=1
 move_and_truncate_log() {
-    new_log_file="/home/utkalika/Work/vulnerable-photo-app/logs/ProfileService/Benign/get_profile_${i}_normal.log"
+    new_log_file="/home/$hostname/Work/vulnerable-photo-app/logs/ProfileService/Benign/get_profile_${i}_normal.log"
     cat "$log_file" > "$new_log_file" && truncate -s 0 "$log_file"
     echo "Log content moved to $new_log_file and source log file truncated."
 }
